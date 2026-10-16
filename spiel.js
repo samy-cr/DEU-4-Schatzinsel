@@ -6,11 +6,13 @@
 // x und y: wo die Insel liegt (in Prozent der Kartenbreite/-höhe).
 // bootX und bootY: wo das Boot anlegt, wenn es bei dieser Insel ist.
 const STATIONEN = [
-  { nr: 1, name: "Palmenstrand",   symbol: "🏖️", thema: "Wortarten",        x: 15, y: 73, bootX: 24, bootY: 91 },
-  { nr: 2, name: "Dschungelinsel", symbol: "🐒", thema: "Zeitformen",       x: 33, y: 35, bootX: 42, bootY: 53 },
-  { nr: 3, name: "Vulkaninsel",    symbol: "🌋", thema: "Rechtschreibung",  x: 54, y: 70, bootX: 63, bootY: 88 },
-  { nr: 4, name: "Höhleninsel",    symbol: "🕳️", thema: "Satzglieder",      x: 73, y: 32, bootX: 82, bootY: 50 },
-  { nr: 5, name: "Schatzinsel",    symbol: "💰", thema: "Abschlussprüfung", x: 88, y: 72, bootX: 76, bootY: 92 },
+  { nr: 1, name: "Palmenstrand",   symbol: "🏖️", thema: "Doppelkonsonanten",         x: 11, y: 75, bootX: 18, bootY: 92 },
+  { nr: 2, name: "Dschungelinsel", symbol: "🐒", thema: "Rechtschreibstrategien",    x: 25, y: 32, bootX: 32, bootY: 49 },
+  { nr: 3, name: "Krabbenbucht",   symbol: "🦀", thema: "Trennregeln",               x: 39, y: 72, bootX: 46, bootY: 89 },
+  { nr: 4, name: "Vulkaninsel",    symbol: "🌋", thema: "Wortarten",                 x: 53, y: 30, bootX: 60, bootY: 47 },
+  { nr: 5, name: "Höhleninsel",    symbol: "🕳️", thema: "Satzglieder",               x: 67, y: 72, bootX: 74, bootY: 89 },
+  { nr: 6, name: "Gipfelinsel",    symbol: "⛰️", thema: "Steigerung von Adjektiven", x: 80, y: 28, bootX: 87, bootY: 45 },
+  { nr: 7, name: "Schatzinsel",    symbol: "💰", thema: "Abschlussprüfung",          x: 90, y: 73, bootX: 82, bootY: 93 },
 ];
 
 // ----- 2. Der Spielstand -----
@@ -22,14 +24,18 @@ let spielstand = {
   sterne: {},      // beste Sterne pro Insel, z. B. { 1: 3 }
 };
 
+// Name, unter dem der Spielstand gespeichert wird. Wenn sich die Inseln ändern,
+// einfach die Nummer erhöhen – dann starten alle mit einem frischen Spielstand.
+const SPEICHER_NAME = "schatzinsel-v2";
+
 // Spielstand im Browser speichern, damit er beim nächsten Öffnen noch da ist.
 // try/catch: Falls der Browser das Speichern verbietet, läuft das Spiel trotzdem.
 function speichern() {
-  try { localStorage.setItem("schatzinsel", JSON.stringify(spielstand)); } catch (e) {}
+  try { localStorage.setItem(SPEICHER_NAME, JSON.stringify(spielstand)); } catch (e) {}
 }
 function laden() {
   try {
-    const gespeichert = localStorage.getItem("schatzinsel");
+    const gespeichert = localStorage.getItem(SPEICHER_NAME);
     if (gespeichert) spielstand = JSON.parse(gespeichert);
   } catch (e) {}
   // Ältere Spielstände kennen stufen/sterne noch nicht
