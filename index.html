@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Die Schatzinsel der Wörter</title>
+
+  <!-- Aussehen und Schriften (die Schriften liegen im Ordner "fonts") -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== BILDSCHIRM 1: Start ===== -->
+  <section id="startbildschirm" class="bildschirm aktiv">
+    <div class="start-karte">
+      <div class="schiff">⛵</div>
+      <h1>Die Schatzinsel<br>der Wörter</h1>
+      <p class="untertitel">Löse die Rätsel, sammle die Kartenstücke und finde den Schatz!</p>
+
+      <label for="name-eingabe">Wie heißt du, Pirat?</label>
+      <input id="name-eingabe" type="text" maxlength="15" placeholder="Dein Name" autocomplete="off">
+
+      <button id="start-knopf" class="knopf knopf-gross">Abenteuer starten 🏴‍☠️</button>
+    </div>
+  </section>
+
+  <!-- ===== BILDSCHIRM 2: Inselkarte ===== -->
+  <section id="kartenbildschirm" class="bildschirm">
+    <header class="kopfzeile">
+      <div id="begruessung">Ahoi!</div>
+      <div class="kartenstuecke">
+        Kartenstücke: <span id="stueck-anzeige"></span>
+      </div>
+      <button id="neustart-knopf" class="knopf knopf-klein">Neu starten</button>
+    </header>
+
+    <div class="insel-rahmen">
+      <!-- Das Meer mit den Inseln wird als Grafik (SVG) gezeichnet -->
+      <svg class="meer" viewBox="0 0 1000 600" aria-hidden="true">
+        <defs>
+          <!-- Eine Inselform, die wir fünfmal wiederverwenden -->
+          <path id="inselform" d="M-110,10 C-120,-50 -50,-85 10,-80 C80,-90 120,-40 115,10 C120,60 60,85 0,80 C-70,90 -105,55 -110,10 Z"/>
+        </defs>
+
+        <!-- Die Seeroute (liegt unter den Inseln, ist also nur im Wasser zu sehen) -->
+        <path class="seeroute" d="M150,440 C220,330 260,260 330,210 S470,430 540,420 S660,180 730,190 S840,380 880,430"/>
+
+        <!-- Jede Insel: heller Wasserring, Sandstrand, grünes Inneres -->
+        <g transform="translate(150,440)">
+          <use href="#inselform" class="flachwasser" transform="scale(1.2)"/>
+          <use href="#inselform" class="sand"/>
+          <use href="#inselform" class="wiese" transform="scale(0.7)"/>
+        </g>
+        <g transform="translate(330,210)">
+          <use href="#inselform" class="flachwasser" transform="scale(1.2) rotate(15)"/>
+          <use href="#inselform" class="sand" transform="rotate(15)"/>
+          <use href="#inselform" class="wiese dschungel" transform="scale(0.8) rotate(15)"/>
+        </g>
+        <g transform="translate(540,420)">
+          <use href="#inselform" class="flachwasser" transform="scale(1.2) rotate(-10)"/>
+          <use href="#inselform" class="sand" transform="rotate(-10)"/>
+          <use href="#inselform" class="fels" transform="scale(0.7) rotate(-10)"/>
+        </g>
+        <g transform="translate(730,190)">
+          <use href="#inselform" class="flachwasser" transform="scale(1.2) rotate(30)"/>
+          <use href="#inselform" class="sand" transform="rotate(30)"/>
+          <use href="#inselform" class="fels dunkel" transform="scale(0.7) rotate(30)"/>
+        </g>
+        <g transform="translate(880,430) scale(0.95)">
+          <use href="#inselform" class="flachwasser" transform="scale(1.2) rotate(-20)"/>
+          <use href="#inselform" class="sand" transform="rotate(-20)"/>
+          <use href="#inselform" class="wiese" transform="scale(0.7) rotate(-20)"/>
+        </g>
+      </svg>
+
+      <!-- Deko auf den Inseln und im Meer -->
+      <span class="deko" style="left:8%;  top:68%">🌴</span>
+      <span class="deko klein" style="left:21%; top:80%">🐚</span>
+      <span class="deko" style="left:26%; top:30%">🌳</span>
+      <span class="deko" style="left:40%; top:28%">🌴</span>
+      <span class="deko klein" style="left:47%; top:74%">🪨</span>
+      <span class="deko klein" style="left:79%; top:24%">🦇</span>
+      <span class="deko" style="left:93%; top:62%">🌴</span>
+      <span class="deko klein" style="left:83%; top:78%">❌</span>
+      <span class="deko wal" style="left:60%; top:8%">🐋</span>
+      <span class="deko papagei" style="left:18%; top:15%">🦜</span>
+      <span class="deko wolke" style="left:45%; top:6%">☁️</span>
+
+      <!-- Hier setzt spiel.js die Insel-Knöpfe hinein -->
+      <div id="stationen"></div>
+
+      <!-- Das Boot des Kindes: es fährt von Insel zu Insel -->
+      <div id="boot" class="boot-figur">⛵</div>
+    </div>
+
+    <p id="hinweis" class="hinweis">Tippe auf die leuchtende Insel, um das Abenteuer zu beginnen!</p>
+  </section>
+
+  <!-- ===== BILDSCHIRM 3: Rätsel auf einer Insel ===== -->
+  <section id="quizbildschirm" class="bildschirm">
+    <header class="kopfzeile">
+      <div id="quiz-titel" class="quiz-titel"></div>
+      <div id="fortschritt" class="fortschritt" aria-label="Münzen"></div>
+      <div id="seegang" class="seegang"></div>
+      <button id="quiz-abbrechen" class="knopf knopf-klein">🗺️ Zur Karte</button>
+    </header>
+
+    <!-- Die Aufgabenkarte (sieht aus wie altes Papier) -->
+    <div id="aufgaben-karte" class="aufgaben-karte">
+      <div id="aufgabe-nummer" class="aufgabe-nummer"></div>
+      <p id="aufgabe-frage" class="aufgabe-frage"></p>
+      <div id="aufgabe-inhalt" class="aufgabe-inhalt"></div>
+      <div id="antworten" class="antworten"></div>
+      <button id="weiter-knopf" class="knopf knopf-gross versteckt">Weiter ➜</button>
+    </div>
+
+    <!-- Das Ergebnis am Ende einer Insel -->
+    <div id="ergebnis" class="aufgaben-karte ergebnis versteckt">
+      <div id="ergebnis-symbol" class="ergebnis-symbol"></div>
+      <h2 id="ergebnis-titel"></h2>
+      <div id="ergebnis-sterne" class="ergebnis-sterne"></div>
+      <p id="ergebnis-text"></p>
+      <button id="ergebnis-knopf" class="knopf knopf-gross"></button>
+      <button id="ergebnis-karte" class="knopf knopf-klein">🗺️ Zur Karte</button>
+    </div>
+
+    <!-- Der Papagei mit seiner Sprechblase -->
+    <div class="papagei-ecke">
+      <div id="papagei" class="papagei-gross">🦜</div>
+      <div id="sprechblase" class="sprechblase"></div>
+    </div>
+  </section>
+
+  <!-- ===== Fenster für Inseln, die noch keine Aufgaben haben ===== -->
+  <div id="dialog" class="dialog-hintergrund versteckt">
+    <div class="dialog">
+      <div id="dialog-symbol" class="dialog-symbol"></div>
+      <h2 id="dialog-titel"></h2>
+      <p id="dialog-text"></p>
+      <button id="dialog-schliessen" class="knopf">Zurück zur Karte</button>
+    </div>
+  </div>
+
+  <!-- Ton-Schalter, immer unten rechts sichtbar -->
+  <div class="ton-leiste">
+    <button id="knopf-effekte" class="ton-knopf" title="Geräusche an/aus" aria-label="Geräusche an oder aus">🔊</button>
+    <button id="knopf-musik" class="ton-knopf" title="Musik an/aus" aria-label="Musik an oder aus">🎵</button>
+  </div>
+
+  <script src="ton.js"></script>
+  <script src="aufgaben.js"></script>
+  <script src="spiel.js"></script>
+</body>
+</html>

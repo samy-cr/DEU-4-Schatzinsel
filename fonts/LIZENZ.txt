@@ -1,0 +1,9 @@
+Schriften in diesem Ordner
+
+Nunito       – Copyright The Nunito Project Authors (https://github.com/googlefonts/nunito)
+Pirata One   – Copyright Rodrigo Fuenzalida, Nicolas Massi (https://fonts.google.com/specimen/Pirata+One)
+
+Beide Schriften stehen unter der SIL Open Font License 1.1:
+https://openfontlicense.org
+
+Sie dürfen frei verwendet, mit dem Spiel weitergegeben und auf eigenen Servern bereitgestellt werden.

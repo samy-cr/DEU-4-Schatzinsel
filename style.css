@@ -1,0 +1,638 @@
+/* ===== Schriften: liegen im Ordner "fonts" (SIL Open Font License) =====
+   So wird nichts von fremden Servern geladen – gut für den Datenschutz. */
+@font-face {
+  font-family: "Nunito";
+  src: url("fonts/nunito.woff2") format("woff2");
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Pirata One";
+  src: url("fonts/pirata-one.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===== Farben: hier an einer Stelle festgelegt, damit man sie leicht ändern kann ===== */
+:root {
+  --meer-hell: #4fc3e8;
+  --meer-dunkel: #1565a8;
+  --sand: #f6dca0;
+  --sand-dunkel: #e2b86b;
+  --wiese: #7cc56a;
+  --holz: #8b5a2b;
+  --holz-dunkel: #5e3b1a;
+  --papier: #fff6e0;
+  --gold: #ffc93c;
+  --rot: #e8574a;
+  --text: #3b2a1a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Nunito", Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--meer-hell), var(--meer-dunkel));
+  overflow-x: hidden;
+}
+
+/* Wellen-Muster im Hintergrund */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 20px 10px, rgba(255,255,255,.18) 6px, transparent 7px);
+  background-size: 60px 40px;
+  animation: wellen 8s linear infinite;
+  pointer-events: none;
+}
+@keyframes wellen { to { background-position: 60px 40px; } }
+
+/* ===== Bildschirme: immer nur einer ist sichtbar ===== */
+.bildschirm { display: none; min-height: 100vh; padding: 16px; position: relative; }
+.bildschirm.aktiv { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* ===== Startbildschirm ===== */
+.start-karte {
+  background: var(--papier);
+  border: 6px solid var(--holz);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 0 var(--holz-dunkel), 0 20px 40px rgba(0,0,0,.3);
+}
+.schiff { font-size: 72px; animation: schaukeln 3s ease-in-out infinite; }
+@keyframes schaukeln {
+  0%, 100% { transform: rotate(-6deg) translateY(0); }
+  50%      { transform: rotate(6deg) translateY(-6px); }
+}
+h1, h2 { font-family: "Pirata One", cursive; font-weight: normal; margin: 8px 0; }
+h1 { font-size: clamp(36px, 8vw, 52px); line-height: 1; color: var(--holz-dunkel); }
+.untertitel { font-size: 18px; margin: 12px 0 24px; }
+
+label { display: block; font-weight: 900; font-size: 18px; margin-bottom: 8px; }
+input {
+  width: 100%;
+  font: inherit;
+  font-size: 22px;
+  text-align: center;
+  padding: 12px;
+  border: 3px solid var(--sand-dunkel);
+  border-radius: 14px;
+  background: white;
+  margin-bottom: 20px;
+}
+input:focus { outline: none; border-color: var(--holz); }
+
+/* ===== Knöpfe ===== */
+.knopf {
+  font: inherit;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--holz-dunkel);
+  background: var(--gold);
+  border: none;
+  border-radius: 14px;
+  padding: 12px 22px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #c99400;
+  transition: transform .1s;
+}
+.knopf:hover { transform: translateY(-2px); }
+.knopf:active { transform: translateY(3px); box-shadow: 0 2px 0 #c99400; }
+.knopf-gross { font-size: 22px; padding: 16px 28px; width: 100%; }
+.knopf-klein { font-size: 14px; padding: 8px 14px; background: var(--papier); box-shadow: 0 4px 0 var(--sand-dunkel); }
+
+/* ===== Kartenbildschirm ===== */
+#kartenbildschirm.aktiv { justify-content: flex-start; gap: 12px; }
+
+.kopfzeile {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--papier);
+  border: 4px solid var(--holz);
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+#begruessung { font-family: "Pirata One", cursive; font-size: 26px; color: var(--holz-dunkel); }
+#stueck-anzeige { font-size: 22px; letter-spacing: 2px; }
+
+.insel-rahmen {
+  position: relative;
+  width: 100%;
+  max-width: 1000px;
+  aspect-ratio: 5 / 3;
+}
+.meer { width: 100%; height: 100%; display: block; }
+.flachwasser { fill: rgba(255,255,255,.3); }
+.sand { fill: var(--sand); stroke: var(--sand-dunkel); stroke-width: 4; }
+.wiese { fill: var(--wiese); }
+.wiese.dschungel { fill: #3f9b4a; }
+.fels { fill: #9b8a7a; }
+.fels.dunkel { fill: #6d6259; }
+
+/* Gestrichelte Seeroute, die sich langsam bewegt */
+.seeroute {
+  fill: none;
+  stroke: white;
+  stroke-width: 6;
+  stroke-dasharray: 4 18;
+  stroke-linecap: round;
+  opacity: .85;
+  animation: route 2s linear infinite;
+}
+@keyframes route { to { stroke-dashoffset: -44; } }
+
+/* Deko-Bilder auf der Insel */
+.deko {
+  position: absolute;
+  font-size: clamp(22px, 5vw, 44px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.deko.klein { font-size: clamp(16px, 3vw, 28px); }
+.papagei { animation: fliegen 6s ease-in-out infinite; }
+@keyframes fliegen {
+  0%, 100% { transform: translate(-50%, -50%); }
+  50%      { transform: translate(40%, -80%); }
+}
+.wal { animation: tauchen 7s ease-in-out infinite; }
+@keyframes tauchen {
+  0%, 100% { transform: translate(-50%, -50%); opacity: 1; }
+  50%      { transform: translate(-50%, -20%); opacity: .3; }
+}
+.wolke { opacity: .9; animation: ziehen 20s linear infinite; }
+@keyframes ziehen {
+  from { transform: translate(-300%, -50%); }
+  to   { transform: translate(300%, -50%); }
+}
+
+/* ===== Stationen auf der Karte ===== */
+.station {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(48px, 11vw, 96px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 5px solid var(--holz);
+  background: var(--papier);
+  font-size: clamp(22px, 5vw, 44px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 0 var(--holz-dunkel);
+  transition: transform .15s;
+}
+.station:hover { transform: translate(-50%, -50%) scale(1.08); }
+
+.station .name {
+  position: absolute;
+  top: 100%;
+  margin-top: 10px;
+  white-space: nowrap;
+  font-size: clamp(11px, 1.8vw, 16px);
+  font-weight: 900;
+  background: var(--holz);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 8px;
+}
+
+/* Gesperrte Station: grau mit Schloss */
+.station.gesperrt { filter: grayscale(1); opacity: .75; }
+.station.gesperrt::after {
+  content: "🔒";
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  font-size: .5em;
+}
+/* Geschaffte Station: goldener Rand mit Haken */
+.station.geschafft { border-color: var(--gold); }
+.station.geschafft::after {
+  content: "✅";
+  position: absolute;
+  right: -8px;
+  top: -8px;
+  font-size: .5em;
+}
+/* Aktuelle Station leuchtet */
+.station.aktuell { animation: leuchten 1.5s ease-in-out infinite; }
+@keyframes leuchten {
+  0%, 100% { box-shadow: 0 6px 0 var(--holz-dunkel), 0 0 0 0 rgba(255,201,60,.9); }
+  50%      { box-shadow: 0 6px 0 var(--holz-dunkel), 0 0 0 14px rgba(255,201,60,0); }
+}
+/* Wackeln, wenn man auf eine gesperrte Station tippt */
+.station.wackeln { animation: wackeln .4s; }
+@keyframes wackeln {
+  25% { transform: translate(-60%, -50%); }
+  75% { transform: translate(-40%, -50%); }
+}
+
+/* Das Boot schaukelt im Wasser und segelt sanft zur nächsten Insel */
+.boot-figur {
+  position: absolute;
+  font-size: clamp(28px, 6vw, 56px);
+  transform: translate(-50%, -50%);
+  animation: boot-schaukeln 3s ease-in-out infinite;
+  pointer-events: none;
+  transition: left 2.5s ease-in-out, top 2.5s ease-in-out;
+  z-index: 2;
+  filter: drop-shadow(0 4px 2px rgba(0,0,0,.3));
+}
+@keyframes boot-schaukeln {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-6deg); }
+  50%      { transform: translate(-50%, -60%) rotate(6deg); }
+}
+/* Beim allerersten Platzieren soll das Boot nicht über die Karte fahren */
+.boot-figur.sofort { transition: none; }
+/* Wenn das Boot nach links fährt, wird es gespiegelt */
+.boot-figur.links { scale: -1 1; }
+
+.test-knopf { display: block; margin: 16px auto 0; opacity: .8; }
+
+.hinweis {
+  background: var(--papier);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  text-align: center;
+  max-width: 1000px;
+}
+
+/* ===== Dialogfenster ===== */
+.dialog-hintergrund {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 30, 60, .6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+.dialog-hintergrund.versteckt { display: none; }
+.dialog {
+  background: var(--papier);
+  border: 6px solid var(--holz);
+  border-radius: 24px;
+  padding: 28px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  animation: aufploppen .3s ease-out;
+}
+@keyframes aufploppen { from { transform: scale(.7); opacity: 0; } }
+.dialog-symbol { font-size: 64px; }
+.dialog h2 { font-size: 36px; color: var(--holz-dunkel); }
+.dialog p { font-size: 18px; margin-bottom: 24px; }
+
+.versteckt { display: none !important; }
+
+/* ===== Rätsel-Bildschirm ===== */
+#quizbildschirm.aktiv { justify-content: flex-start; gap: 14px; }
+#quizbildschirm .kopfzeile { max-width: 760px; }
+.quiz-titel { font-family: "Pirata One", cursive; font-size: 26px; color: var(--holz-dunkel); }
+
+/* Fortschritt: 5 Münzplätze */
+.fortschritt { display: flex; gap: 6px; }
+.muenzplatz {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 3px dashed var(--sand-dunkel);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.muenzplatz.jetzt { border-style: solid; border-color: var(--holz); }
+.muenzplatz.gold   { border: none; background: radial-gradient(circle at 35% 35%, #fff3b0, var(--gold) 55%, #c99400); animation: muenze-rein .5s ease-out; }
+.muenzplatz.silber { border: none; background: radial-gradient(circle at 35% 35%, #ffffff, #c9d1d9 55%, #8a96a3); animation: muenze-rein .5s ease-out; }
+.muenzplatz.verpasst { border-style: solid; border-color: #c9b8a0; opacity: .6; }
+@keyframes muenze-rein {
+  0%   { transform: scale(0) rotateY(0); }
+  70%  { transform: scale(1.3) rotateY(360deg); }
+  100% { transform: scale(1) rotateY(360deg); }
+}
+
+/* Seegang = Schwierigkeit */
+.seegang {
+  font-size: 14px;
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #d9f2fb;
+  color: var(--meer-dunkel);
+}
+.seegang.wechsel { animation: aufploppen .5s ease-out; }
+
+/* Die Aufgabenkarte aus altem Papier */
+.aufgaben-karte {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(139,90,43,.12), transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(139,90,43,.15), transparent 40%),
+    var(--papier);
+  border: 6px solid var(--holz);
+  border-radius: 24px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  box-shadow: 0 10px 0 var(--holz-dunkel), 0 18px 30px rgba(0,0,0,.25);
+  animation: aufploppen .35s ease-out;
+}
+.aufgabe-nummer {
+  position: absolute;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--rot);
+  color: white;
+  font-weight: 900;
+  padding: 4px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.aufgabe-frage { font-size: clamp(20px, 4vw, 26px); font-weight: 900; margin: 6px 0 18px; }
+
+/* Das Wort auf einem Holzschild */
+.wortschild {
+  display: inline-block;
+  font-size: clamp(36px, 9vw, 60px);
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(180deg, #a86c34, var(--holz));
+  border: 4px solid var(--holz-dunkel);
+  border-radius: 14px;
+  padding: 10px 32px;
+  margin-bottom: 22px;
+  text-shadow: 0 3px 0 var(--holz-dunkel);
+  transform: rotate(-2deg);
+}
+
+/* Ein Satz, in dem ein Wort markiert ist oder Wörter angetippt werden */
+.satz {
+  font-size: clamp(22px, 5vw, 32px);
+  line-height: 1.8;
+  margin-bottom: 22px;
+}
+.satz mark {
+  background: linear-gradient(transparent 55%, var(--gold) 55%);
+  font-weight: 900;
+  padding: 0 4px;
+}
+.wort-chip {
+  font: inherit;
+  font-size: clamp(20px, 4.5vw, 30px);
+  font-weight: 700;
+  color: var(--text);
+  background: white;
+  border: 3px solid var(--sand-dunkel);
+  border-radius: 12px;
+  padding: 4px 12px;
+  margin: 5px 3px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--sand-dunkel);
+  transition: transform .1s;
+}
+.wort-chip:hover:not(:disabled) { transform: translateY(-3px); }
+
+/* Antwort-Knöpfe in fröhlichen Farben */
+.antworten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.antwort {
+  font: inherit;
+  font-size: clamp(20px, 4vw, 24px);
+  font-weight: 900;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 10px;
+  cursor: pointer;
+  transition: transform .1s;
+  text-shadow: 0 2px 0 rgba(0,0,0,.2);
+}
+.antwort:nth-child(1) { background: #3fa7d6; box-shadow: 0 6px 0 #2a7ea5; }
+.antwort:nth-child(2) { background: #f29e4c; box-shadow: 0 6px 0 #c47629; }
+.antwort:nth-child(3) { background: #9b6fd3; box-shadow: 0 6px 0 #7350a5; }
+.antwort:nth-child(4) { background: #e86a92; box-shadow: 0 6px 0 #b9466c; }
+.antwort:hover:not(:disabled) { transform: translateY(-3px); }
+.antwort:active:not(:disabled) { transform: translateY(3px); }
+
+/* Rückmeldung: richtig / falsch */
+.antwort.richtig, .wort-chip.richtig {
+  background: #4caf50 !important;
+  border-color: #2e7d32;
+  color: white;
+  box-shadow: 0 6px 0 #2e7d32 !important;
+  animation: jubeln .5s;
+}
+.antwort.falsch, .wort-chip.falsch {
+  background: #b0a59a !important;
+  border-color: #8a8178;
+  color: white;
+  box-shadow: none !important;
+  animation: schuetteln .4s;
+  opacity: .7;
+}
+.antwort:disabled, .wort-chip:disabled { cursor: default; }
+@keyframes jubeln {
+  50% { transform: scale(1.12); }
+}
+@keyframes schuetteln {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+#weiter-knopf { margin-top: 20px; }
+
+/* Der Papagei mit Sprechblase */
+.papagei-ecke {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.papagei-gross {
+  font-size: clamp(48px, 10vw, 72px);
+  flex-shrink: 0;
+  transform-origin: bottom center;
+}
+.papagei-gross.freut-sich { animation: papagei-huepfen .6s ease-in-out 2; }
+@keyframes papagei-huepfen {
+  50% { transform: translateY(-16px) rotate(-10deg); }
+}
+.sprechblase {
+  position: relative;
+  flex: 1;
+  background: white;
+  border-radius: 18px;
+  padding: 14px 18px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.15);
+  animation: aufploppen .3s ease-out;
+}
+.sprechblase::before {
+  content: "";
+  position: absolute;
+  left: -14px; bottom: 14px;
+  border: 10px solid transparent;
+  border-right: 14px solid white;
+  border-left: none;
+}
+.sprechblase.tipp { background: #fff3c4; }
+.sprechblase.tipp::before { border-right-color: #fff3c4; }
+
+/* Glitzer-Teilchen bei richtigen Antworten */
+.glitzer {
+  position: fixed;
+  font-size: 26px;
+  pointer-events: none;
+  z-index: 20;
+  animation: glitzer-flug 1s ease-out forwards;
+}
+@keyframes glitzer-flug {
+  to { transform: translate(var(--dx), var(--dy)) rotate(360deg) scale(.3); opacity: 0; }
+}
+
+/* Ergebnis */
+.ergebnis-symbol { font-size: 90px; animation: drehen 2s ease-in-out infinite; }
+@keyframes drehen {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50%      { transform: rotate(8deg) scale(1.1); }
+}
+.ergebnis h2 { font-size: 40px; color: var(--holz-dunkel); }
+.ergebnis-sterne { font-size: 48px; letter-spacing: 6px; margin: 8px 0; }
+.ergebnis-sterne span { display: inline-block; animation: muenze-rein .6s ease-out backwards; }
+.ergebnis-sterne span:nth-child(2) { animation-delay: .3s; }
+.ergebnis-sterne span:nth-child(3) { animation-delay: .6s; }
+.ergebnis p { font-size: 20px; }
+.ergebnis .knopf-klein { margin-top: 14px; }
+
+/* Lücke im Lückensatz */
+.luecke {
+  display: inline-block;
+  min-width: 3.5em;
+  padding: 0 10px;
+  margin: 0 2px;
+  border-bottom: 4px dashed var(--rot);
+  background: #fff1c1;
+  border-radius: 8px 8px 0 0;
+  color: var(--rot);
+  font-weight: 900;
+  animation: luecke-pulsieren 1.5s ease-in-out infinite;
+}
+@keyframes luecke-pulsieren { 50% { background: #ffe08a; } }
+.luecke.gefuellt {
+  color: #2e7d32;
+  border-bottom: 4px solid #4caf50;
+  background: #dff3d8;
+  animation: jubeln .5s;
+}
+
+/* ===== Eigener Hintergrund für jede Insel ===== */
+#quizbildschirm[data-insel="1"] {  /* Palmenstrand: Meer und Sand */
+  background: linear-gradient(180deg, #7fd3f0 0%, #4fc3e8 55%, #f6dca0 55%, #e9c98a 100%);
+}
+#quizbildschirm[data-insel="2"] {  /* Dschungel: sattes Grün mit Blätter-Flecken */
+  background:
+    radial-gradient(ellipse at 10% 0%, #2f7d32 0 18%, transparent 19%),
+    radial-gradient(ellipse at 90% 5%, #2f7d32 0 15%, transparent 16%),
+    radial-gradient(ellipse at 50% -5%, #388e3c 0 12%, transparent 13%),
+    radial-gradient(circle at 20% 80%, rgba(255,255,255,.08) 0 10%, transparent 11%),
+    linear-gradient(180deg, #4caf50, #1b5e20);
+}
+#quizbildschirm[data-insel="3"] {  /* Vulkan: glühend */
+  background: linear-gradient(180deg, #5d4037, #bf360c 70%, #ff7043);
+}
+#quizbildschirm[data-insel="4"] {  /* Höhle: dunkel mit Kristall-Schimmer */
+  background:
+    radial-gradient(circle at 15% 30%, rgba(129,212,250,.25) 0 4%, transparent 5%),
+    radial-gradient(circle at 85% 60%, rgba(206,147,216,.25) 0 5%, transparent 6%),
+    linear-gradient(180deg, #37474f, #1c2529);
+}
+#quizbildschirm[data-insel="5"] {  /* Schatzinsel: goldener Sonnenuntergang */
+  background: linear-gradient(180deg, #ff8a65, #ffb74d 50%, #ffe082);
+}
+
+/* ===== Piraten-Urkunde ===== */
+.dialog.urkunde {
+  border: 8px double var(--gold);
+  outline: 6px solid var(--holz);
+  background:
+    radial-gradient(circle at 0 0, rgba(201,148,0,.25), transparent 30%),
+    radial-gradient(circle at 100% 100%, rgba(201,148,0,.25), transparent 30%),
+    var(--papier);
+}
+.dialog.urkunde .dialog-symbol { font-size: 90px; animation: drehen 2s ease-in-out infinite; }
+.dialog.urkunde h2 { font-size: 44px; }
+.dialog.urkunde p { line-height: 1.7; }
+.urkunde-name {
+  display: inline-block;
+  font-family: "Pirata One", cursive;
+  font-weight: normal;
+  font-size: 40px;
+  color: var(--rot);
+  margin: 6px 0;
+}
+
+/* ===== Ton-Schalter unten rechts ===== */
+.ton-leiste {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  gap: 8px;
+  z-index: 30;
+}
+.ton-knopf {
+  position: relative;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 3px solid var(--holz);
+  background: var(--papier);
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--holz-dunkel);
+}
+.ton-knopf:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--holz-dunkel); }
+/* Ausgeschaltet: blass mit rotem Strich */
+.ton-knopf.aus { opacity: .55; }
+.ton-knopf.aus::after {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; top: 50%;
+  height: 4px;
+  background: var(--rot);
+  border-radius: 2px;
+  transform: rotate(-45deg);
+}
+
+/* Wer am Gerät "Bewegung reduzieren" eingestellt hat, bekommt ruhigere Animationen */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Sterne unter dem Inselnamen auf der Karte */
+.station .sterne { display: block; font-size: .8em; letter-spacing: 1px; }
