@@ -640,6 +640,32 @@ input:focus { outline: none; border-color: var(--holz); }
   transform: rotate(-45deg);
 }
 
+/* ===== Hochformat (Handy, Tablet hochkant): Karte läuft von oben nach unten ===== */
+.insel-rahmen.hochformat {
+  aspect-ratio: 3 / 5;
+  /* So breit wie möglich – aber nie höher als der Bildschirm */
+  width: min(100%, calc((100vh - 200px) * 0.6));
+  width: min(100%, calc((100svh - 200px) * 0.6));
+  max-width: 100%;
+}
+.hochformat .station {
+  width: clamp(44px, 12vw, 80px);
+  font-size: clamp(20px, 6vw, 38px);
+}
+.hochformat .station .name { font-size: clamp(11px, 3vw, 15px); }
+.hochformat .deko { font-size: clamp(20px, 6vw, 40px); }
+.hochformat .deko.klein { font-size: clamp(16px, 4.5vw, 30px); }
+
+/* Kopfzeile auf schmalen Bildschirmen kompakter */
+@media (max-width: 520px) {
+  .kopfzeile { padding: 8px 12px; gap: 6px 10px; font-size: 14px; border-width: 3px; }
+  #begruessung, .quiz-titel { font-size: 22px; }
+  #stueck-anzeige { font-size: 16px; letter-spacing: 0; }
+  .muenzplatz { width: 24px; height: 24px; }
+  .kopfzeile .knopf-klein { font-size: 13px; padding: 6px 10px; }
+  .hinweis { font-size: 14px; }
+}
+
 /* Wer am Gerät "Bewegung reduzieren" eingestellt hat, bekommt ruhigere Animationen */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

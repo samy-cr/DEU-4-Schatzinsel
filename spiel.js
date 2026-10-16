@@ -65,6 +65,33 @@ function aktuelleStation() {
   return offen ? offen.nr : STATIONEN.length;
 }
 
+// ----- Hochformat (Handy) -----
+// Im Hochformat wird die Karte an der Diagonale gespiegelt: Aus x wird y
+// und aus y wird x. So laufen die Inseln von oben nach unten statt von links
+// nach rechts – und alle Positionen aus der Liste oben passen weiterhin.
+const hochformatAbfrage = window.matchMedia("(orientation: portrait)");
+let hochformat = hochformatAbfrage.matches;
+
+// Wandelt x/y (Prozent) in die Position auf dem Bildschirm um
+function position(element, x, y) {
+  element.style.left = (hochformat ? y : x) + "%";
+  element.style.top = (hochformat ? x : y) + "%";
+}
+
+function kartenformatAnpassen() {
+  hochformat = hochformatAbfrage.matches;
+  $("stationen").parentElement.classList.toggle("hochformat", hochformat);
+  $("meer").setAttribute("viewBox", hochformat ? "0 0 600 1000" : "0 0 1000 600");
+  // matrix(0 1 1 0 0 0) vertauscht x und y in der Grafik
+  $("karten-inhalt").setAttribute("transform", hochformat ? "matrix(0 1 1 0 0 0)" : "");
+  document.querySelectorAll(".deko").forEach((d) => position(d, d.dataset.x, d.dataset.y));
+  zeichneKarte();
+  if (bootBeiInsel !== null) bootFahren(bootBeiInsel, true);
+}
+// Handy gedreht? Dann Karte neu anordnen.
+if (hochformatAbfrage.addEventListener) hochformatAbfrage.addEventListener("change", kartenformatAnpassen);
+else hochformatAbfrage.addListener(kartenformatAnpassen); // ältere Browser
+
 // ----- 4. Das Boot -----
 let bootBeiInsel = null; // bei welcher Insel das Boot gerade liegt
 
@@ -77,13 +104,14 @@ function bootFahren(nr, sofort) {
   if (sofort) boot.classList.add("sofort");
 
   // Fährt das Boot nach links? Dann spiegeln, damit es nach vorne schaut.
-  if (bootBeiInsel !== null) {
+  if (bootBeiInsel !== null && bootBeiInsel !== nr) {
     const start = STATIONEN[bootBeiInsel - 1];
-    boot.classList.toggle("links", ziel.bootX < start.bootX);
+    // "links" bezieht sich auf den Bildschirm: im Hochformat ist das die y-Richtung der Liste
+    const nachLinks = hochformat ? ziel.bootY < start.bootY : ziel.bootX < start.bootX;
+    boot.classList.toggle("links", nachLinks);
   }
 
-  boot.style.left = ziel.bootX + "%";
-  boot.style.top = ziel.bootY + "%";
+  position(boot, ziel.bootX, ziel.bootY);
   bootBeiInsel = nr;
 
   if (sofort) {
@@ -103,8 +131,7 @@ function zeichneKarte() {
   STATIONEN.forEach((station) => {
     const knopf = document.createElement("button");
     knopf.className = "station";
-    knopf.style.left = station.x + "%";
-    knopf.style.top = station.y + "%";
+    position(knopf, station.x, station.y);
     const sterne = "⭐".repeat(spielstand.sterne[station.nr] || 0);
     knopf.innerHTML = `${station.symbol}<span class="name">${station.name}<span class="sterne">${sterne}</span></span>`;
     knopf.setAttribute("aria-label", `Insel ${station.nr}: ${station.name}`);
@@ -618,6 +645,7 @@ zeigeTonSchalter();
 
 // ----- 8. Spielstart -----
 laden();
+kartenformatAnpassen(); // Querformat (Laptop) oder Hochformat (Handy)?
 if (spielstand.name) {
   // Kind war schon mal da: direkt zur Karte
   zeichneKarte();
